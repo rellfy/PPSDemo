@@ -4,6 +4,8 @@ Example Unity project using the [Processor-Profile System pattern](https://githu
 ![Banner](https://cdn.discordapp.com/attachments/607007438180450305/662455141320097802/unknown.png)
 
 ## About
+**Unity version: 2019.30f3**. Downgrading should not be a problem for recent versions.
+
 This is a simple shooter game. All characters are rolling balls with a gyroscopic turret.
 Enemies and health potions spawn randomly within the player's radius.
 
