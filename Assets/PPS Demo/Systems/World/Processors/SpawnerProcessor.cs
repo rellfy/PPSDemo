@@ -18,20 +18,20 @@ public class SpawnerProcessor : Processor<WorldSystem, WorldProfile> {
     }
 
     private Vector3 RandomPositionAroundPlayer(float radius) {
-        return this.system.LocalSystem.LocalInstance.Shooter.Profile.Rigidbody.position + new Vector3(Random.Range(-radius, radius), 0.5f, Random.Range(-radius, radius));
+        return System.LocalSystem.LocalInstance.Shooter.Profile.Rigidbody.position + new Vector3(Random.Range(-radius, radius), 0.5f, Random.Range(-radius, radius));
     }
 
     private void SpawnHealthContainers() {
-        float timeSinceLastSpawn = Time.timeSinceLevelLoad - this.profile.LastHealthContainerSpawnedSeconds;
-        if (timeSinceLastSpawn < 60f/this.system.HealthSpawner.frequencyPM)
+        float timeSinceLastSpawn = Time.timeSinceLevelLoad - Profile.LastHealthContainerSpawnedSeconds;
+        if (timeSinceLastSpawn < 60f/System.HealthSpawner.frequencyPM)
             return;
 
-        this.profile.LastHealthContainerSpawnedSeconds = Time.timeSinceLevelLoad;
+        Profile.LastHealthContainerSpawnedSeconds = Time.timeSinceLevelLoad;
 
-        GameObject healthPotion = UnityEngine.Object.Instantiate(this.system.HealthPotion, RandomPositionAroundPlayer(120f), Quaternion.identity);
+        GameObject healthPotion = UnityEngine.Object.Instantiate(System.HealthPotion, RandomPositionAroundPlayer(120f), Quaternion.identity);
         // Add CollisionDelegate component from PPS and listen to TriggerEnter events.
         healthPotion.AddComponent<CollisionDelegate>().TriggerEnter += (sender, collider) => {
-            if (!this.system.WorldInstance.FindShooter(collider.transform.parent, out ShooterProcessor processor))
+            if (!System.WorldInstance.FindShooter(collider.transform.parent, out ShooterProcessor processor))
                 return;
 
             processor.Profile.Health = Mathf.Clamp(processor.Profile.Health + 30f, 0f, 100f);
@@ -40,13 +40,13 @@ public class SpawnerProcessor : Processor<WorldSystem, WorldProfile> {
     }
 
     private void SpawnShooter() {
-        float timeSinceLastSpawn = Time.timeSinceLevelLoad - this.profile.LastShooterSpawnedSeconds;
-        if (timeSinceLastSpawn < 60f/this.system.EnemySpawner.frequencyPM || this.system.EnemySpawner.maxObjects <= this.system.ShooterSystem.Instances.Count)
+        float timeSinceLastSpawn = Time.timeSinceLevelLoad - Profile.LastShooterSpawnedSeconds;
+        if (timeSinceLastSpawn < 60f/System.EnemySpawner.frequencyPM || System.EnemySpawner.maxObjects <= System.ShooterSystem.Instances.Count)
             return;
 
-        this.profile.LastShooterSpawnedSeconds = Time.timeSinceLevelLoad;
+        Profile.LastShooterSpawnedSeconds = Time.timeSinceLevelLoad;
 
-        ShooterProcessor shooter = this.system.ShooterSystem.DeployInstance();
+        ShooterProcessor shooter = System.ShooterSystem.DeployInstance();
         shooter.Profile.Rigidbody.position = RandomPositionAroundPlayer(120f);
     }
 }

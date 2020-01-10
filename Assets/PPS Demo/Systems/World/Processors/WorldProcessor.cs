@@ -8,11 +8,11 @@ using Random = UnityEngine.Random;
 public class WorldProcessor : Processor<WorldSystem, WorldProfile> {
 
     public WorldProcessor(WorldSystem system, WorldProfile profile) : base(system, profile) {
-        this.subProcessors.Add(new SpawnerProcessor(system, profile));
+        SubProcessors.Add(new SpawnerProcessor(system, profile));
     }
 
     public bool FindShooter(Transform transform, out ShooterProcessor processor) {
-        foreach (ShooterProcessor shooterProcessor in this.system.ShooterSystem.Instances) {
+        foreach (ShooterProcessor shooterProcessor in System.ShooterSystem.Instances) {
             if (shooterProcessor.Profile.Transform != transform)
                  continue;
 
