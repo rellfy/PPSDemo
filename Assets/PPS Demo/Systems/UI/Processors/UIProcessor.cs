@@ -1,9 +1,14 @@
 using PPS;
+using UnityEngine;
 
-public class UIProcessor : Processor<UISystem, UIProfile> {
+public class UIProcessor : Processor<UISystem> {
 
-    public UIProcessor(UISystem system, UIProfile profile) : base(system, profile) {
-        SubProcessors.Add(new ScoreProcessor(system, profile));
-        SubProcessors.Add(new HealthProcessor(system, profile));
+    private UIProfile profile;
+
+    public UIProcessor(UISystem system, GameObject instance) : base(system, instance) {
+        this.profile = new UIProfile(GameObject);
+
+        SubProcessors.Add(new ScoreProcessor(system, this.profile));
+        SubProcessors.Add(new HealthProcessor(system, this.profile));
     }
 }

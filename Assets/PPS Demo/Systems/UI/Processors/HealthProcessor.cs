@@ -1,13 +1,18 @@
 using System;
 using PPS;
 
-public class HealthProcessor : Processor<UISystem, UIProfile> {
+public class HealthProcessor : Processor {
 
-    public HealthProcessor(UISystem system, UIProfile profile) : base(system, profile) {
-        System.WorldSystem.LocalSystem.LocalInstance.Shooter.Profile.HealthChange += OnShooterHealthChange;
+    private UISystem system;
+    private UIProfile profile;
+
+    public HealthProcessor(UISystem system, UIProfile profile) {
+        this.system = system;
+        this.profile = profile;
+        this.system.WorldSystem.LocalSystem.LocalInstance.Shooter.Profile.HealthChange += OnShooterHealthChange;
     }
 
     private void OnShooterHealthChange(object sender, float newHealth) {
-        Profile.SetHealth(newHealth / 100f);
+        this.profile.SetHealth(newHealth / 100f);
     }
 }

@@ -1,8 +1,12 @@
 using PPS;
+using UnityEngine;
 
-public class AudioProcessor : Processor<AudioSystem, AudioProfile> {
+public class AudioProcessor : Processor<AudioSystem> {
 
-    public AudioProcessor(AudioSystem system, AudioProfile profile) : base(system, profile) {
-        SubProcessors.Add(new ShootingProcessor(system, profile));
+    private AudioProfile profile;
+
+    public AudioProcessor(AudioSystem system, GameObject instance) : base(system, instance) {
+        this.profile = new AudioProfile(GameObject);
+        SubProcessors.Add(new ShootingProcessor(system, this.profile));
     }
 }

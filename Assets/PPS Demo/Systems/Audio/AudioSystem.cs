@@ -5,7 +5,7 @@ using UnityEngine;
 using PPS;
 
 [Serializable]
-public class AudioSystem : System<AudioProcessor, AudioProfile> {
+public class AudioSystem : System<AudioProcessor> {
 
     [SerializeField]
     private AudioClip blasterClip;

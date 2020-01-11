@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using PPS;
-using Object = System.Object;
 
 [Serializable]
-public class ShooterSystem : Subsystem<ShooterProcessor, ShooterProfile> {
+public class ShooterSystem : PPS.Subsystem<ShooterProcessor> {
 
     private float bulletSpeed = 50f;
     private float moveSpeed = 5f;

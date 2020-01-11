@@ -5,7 +5,7 @@ using UnityEngine;
 using PPS;
 
 [Serializable]
-public class UISystem : System<UIProcessor, UIProfile> {
+public class UISystem : System<UIProcessor> {
 
     /// <summary>
     /// UISystem only has one instance.

@@ -4,24 +4,25 @@ using PPS;
 using UnityEngine.SceneManagement;
 
 [Serializable]
-public class LocalProcessor : Processor<LocalSystem, LocalProfile> {
+public class LocalProcessor : Processor<LocalSystem> {
 
     [SerializeField]
-    private LocalProfile localProfile;
+    private LocalProfile profile;
     [SerializeField]
     private ShooterProcessor shooter;
     private WorldSystem parentSystem;
 
     public ShooterProcessor Shooter => this.shooter;
+    public LocalProfile Profile => this.profile;
 
-    public LocalProcessor(LocalSystem system, LocalProfile profile) : base(system, profile) {
-        this.localProfile = profile;
+    public LocalProcessor(LocalSystem system, GameObject instance) : base(system, instance) {
+        this.profile = new LocalProfile(GameObject);
         this.parentSystem = (WorldSystem)System.Parent;
         this.shooter = this.parentSystem.ShooterSystem.DeployInstance();
         this.shooter.Profile.IsAI = false;
         this.shooter.Profile.Rigidbody.position = new Vector3(50f, 0.5f, 50f);
         
-        SubProcessors.Add(new LocalCameraProcessor(system, profile.CameraProfile, this.shooter));
+        SubProcessors.Add(new LocalCameraProcessor(this.profile.CameraProfile, this.shooter));
 
         this.shooter.Dead += OnShooterDead;
     }

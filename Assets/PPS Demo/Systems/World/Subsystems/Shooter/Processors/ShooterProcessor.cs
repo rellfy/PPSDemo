@@ -8,11 +8,13 @@ using Random = System.Random;
 using Vector3 = UnityEngine.Vector3;
 
 [Serializable]
-public class ShooterProcessor : Processor<ShooterSystem, ShooterProfile> {
+public class ShooterProcessor : Processor<ShooterSystem> {
 
     [SerializeField]
-    private ShooterProfile shooterProfile;
+    private ShooterProfile profile;
     private WorldSystem worldSystem;
+
+    public ShooterProfile Profile => this.profile;
 
     public event EventHandler<ShooterProcessor> KillAcquired;
     public event EventHandler<ShooterProcessor> Dead;
@@ -23,27 +25,27 @@ public class ShooterProcessor : Processor<ShooterSystem, ShooterProfile> {
     /// This is a way to have an update method without manually checking the state.
     /// In this case, the Process method is used for AI behaviour.
     /// </summary>
-    protected override bool ShouldProcess => Profile.IsAI;
+    protected override bool ShouldProcess => this.profile.IsAI;
     /// <summary>
     /// This member tells whether to call Process on FixedUpdate, if ShouldProcess returns true.
     /// </summary>
     protected override bool ProcessOnFixedUpdate => false;
 
-    public ShooterProcessor(ShooterSystem system, ShooterProfile profile) : base(system, profile) {
+    public ShooterProcessor(ShooterSystem system, GameObject instance) : base(system, instance) {
+        this.profile = new ShooterProfile(GameObject);
         this.worldSystem = (WorldSystem)System.Parent;
-        this.shooterProfile = Profile;
         Dead += OnDead;
     }
 
     private void OnDead(object sender, ShooterProcessor e) {
-        if (Profile.IsAI)
+        if (this.profile.IsAI)
             Dispose();
     }
 
     public override void Dispose() {
-        for (int i = Profile.ShotsFired.Count; i-- > 0;) {
-            Object.Destroy(Profile.ShotsFired[i].bullet.gameObject);
-            Profile.ShotsFired.Remove(Profile.ShotsFired[i]);
+        for (int i = this.profile.ShotsFired.Count; i-- > 0;) {
+            Object.Destroy(this.profile.ShotsFired[i].bullet.gameObject);
+            this.profile.ShotsFired.Remove(this.profile.ShotsFired[i]);
         }
 
         base.Dispose();
@@ -53,7 +55,7 @@ public class ShooterProcessor : Processor<ShooterSystem, ShooterProfile> {
         base.Update();
 
         // Set head to correct position.
-        Profile.Head.transform.position = Profile.Rigidbody.transform.position + (Vector3.up * 1.15f);
+        this.profile.Head.transform.position = this.profile.Rigidbody.transform.position + (Vector3.up * 1.15f);
     }
 
     /// <summary>
@@ -66,7 +68,7 @@ public class ShooterProcessor : Processor<ShooterSystem, ShooterProfile> {
         const float aiAwarenessRadius = 100f;
         const float idealDistance = 10f;
 
-        Collider[] colliders = Physics.OverlapSphere(Profile.Rigidbody.position, aiAwarenessRadius, System.ShooterMask);
+        Collider[] colliders = Physics.OverlapSphere(this.profile.Rigidbody.position, aiAwarenessRadius, System.ShooterMask);
 
         if (colliders.Length == 1)
             return;
@@ -77,15 +79,15 @@ public class ShooterProcessor : Processor<ShooterSystem, ShooterProfile> {
         // Find closest shooter.
         for (int i = 0; i < colliders.Length; i++) {
             // There are only two colliders, which are direct child of the main instance transform.
-            if (colliders[i].transform.parent == Profile.Transform)
+            if (colliders[i].transform.parent == this.profile.Transform)
                 continue;
 
             if (!this.worldSystem.WorldInstance.FindShooter(colliders[i].transform.parent, out ShooterProcessor iteration))
                 continue;
 
-            // Important note: Shooter's Profile.Transform.position is always 0,0,0!
-            // Profile.Rigidbody or Profile.Head hold the true position.
-            float distance = Vector3.Distance(Profile.Rigidbody.position, iteration.Profile.Rigidbody.position);
+            // Important note: Shooter's this.profile.Transform.position is always 0,0,0!
+            // this.profile.Rigidbody or this.profile.Head hold the true position.
+            float distance = Vector3.Distance(this.profile.Rigidbody.position, iteration.Profile.Rigidbody.position);
 
             if (distance >= closestDistance)
                 continue;
@@ -96,13 +98,13 @@ public class ShooterProcessor : Processor<ShooterSystem, ShooterProfile> {
 
         if (closest == null) {
             // Roam.
-            Profile.Rigidbody.velocity = new Vector3(UnityEngine.Random.value, 0, UnityEngine.Random.value).normalized * System.MoveSpeed;
+            this.profile.Rigidbody.velocity = new Vector3(UnityEngine.Random.value, 0, UnityEngine.Random.value).normalized * System.MoveSpeed;
             return;
         }
 
-        Vector3 enemyDirection = (closest.Profile.Rigidbody.position - Profile.Rigidbody.position).normalized;
+        Vector3 enemyDirection = (closest.Profile.Rigidbody.position - this.profile.Rigidbody.position).normalized;
 
-        Profile.Rigidbody.velocity = closestDistance >= idealDistance ?
+        this.profile.Rigidbody.velocity = closestDistance >= idealDistance ?
             enemyDirection.normalized * System.MoveSpeed :
             Vector3.zero;
 
@@ -112,32 +114,32 @@ public class ShooterProcessor : Processor<ShooterSystem, ShooterProfile> {
     }
 
     public void Aim(Vector3 direction) {
-        direction += Profile.Head.transform.position;
-        Profile.Head.transform.LookAt(new Vector3(direction.x, Profile.Head.transform.position.y, direction.z));
+        direction += this.profile.Head.transform.position;
+        this.profile.Head.transform.LookAt(new Vector3(direction.x, this.profile.Head.transform.position.y, direction.z));
     }
 
     // TODO: Further enhance performance with object pooling.
     public void Shoot() {
-        float timeSinceLastShot = Time.timeSinceLevelLoad - Profile.lastShotTimeSeconds;
-        if (timeSinceLastShot < (Profile.IsAI ? 0.25f : 0.01f))
+        float timeSinceLastShot = Time.timeSinceLevelLoad - this.profile.lastShotTimeSeconds;
+        if (timeSinceLastShot < (this.profile.IsAI ? 0.25f : 0.01f))
             return;
 
-        Fire?.Invoke(Profile.AudioSource, null);
-        Profile.lastShotTimeSeconds = Time.timeSinceLevelLoad; 
-        Transform bullet = Object.Instantiate(System.Bullet, Profile.ShootPoint.position, Profile.Head.transform.rotation).GetComponent<Transform>();
-        Profile.ShotsFired.Add(new ShooterProfile.BulletTracker(bullet, Profile.Head.transform.forward));
+        Fire?.Invoke(this.profile.AudioSource, null);
+        this.profile.lastShotTimeSeconds = Time.timeSinceLevelLoad; 
+        Transform bullet = Object.Instantiate(System.Bullet, this.profile.ShootPoint.position, this.profile.Head.transform.rotation).GetComponent<Transform>();
+        this.profile.ShotsFired.Add(new ShooterProfile.BulletTracker(bullet, this.profile.Head.transform.forward));
     }
 
     public void RotationalMovement(Vector3 torque) {
-        Profile.Rigidbody.AddTorque(torque, ForceMode.Acceleration);
+        this.profile.Rigidbody.AddTorque(torque, ForceMode.Acceleration);
     }
 
     /// <summary>
     /// Returns true if the attack killed the Shooter.
     /// </summary>
     public bool Attack(float damage, ShooterProcessor attacker) {
-        Profile.Health -= damage;
-        bool dead = Profile.Health <= 0;
+        this.profile.Health -= damage;
+        bool dead = this.profile.Health <= 0;
 
         if (dead)
             Dead?.Invoke(this, attacker);
@@ -155,7 +157,7 @@ public class ShooterProcessor : Processor<ShooterSystem, ShooterProfile> {
             return;
 
         const float regularAttackDamage = 15f;
-        bool dead = shooter.Attack(Profile.IsAI ? regularAttackDamage / 3f : regularAttackDamage, this);
+        bool dead = shooter.Attack(this.profile.IsAI ? regularAttackDamage / 3f : regularAttackDamage, this);
 
         if (dead)
             KillAcquired?.Invoke(this, shooter);

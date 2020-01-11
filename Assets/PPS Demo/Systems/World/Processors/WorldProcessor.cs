@@ -5,10 +5,14 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 [Serializable]
-public class WorldProcessor : Processor<WorldSystem, WorldProfile> {
+public class WorldProcessor : Processor<WorldSystem> {
 
-    public WorldProcessor(WorldSystem system, WorldProfile profile) : base(system, profile) {
-        SubProcessors.Add(new SpawnerProcessor(system, profile));
+    private WorldProfile profile;
+
+    public WorldProcessor(WorldSystem system, GameObject instance) : base(system, instance) {
+        this.profile = new WorldProfile(GameObject);
+
+        SubProcessors.Add(new SpawnerProcessor(system, this.profile));
     }
 
     public bool FindShooter(Transform transform, out ShooterProcessor processor) {

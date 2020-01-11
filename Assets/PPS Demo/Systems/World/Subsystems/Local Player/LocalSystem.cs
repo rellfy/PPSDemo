@@ -5,7 +5,7 @@ using UnityEngine;
 using PPS;
 
 [Serializable]
-public class LocalSystem : Subsystem<LocalProcessor, LocalProfile> {
+public class LocalSystem : PPS.Subsystem<LocalProcessor> {
 
     /// <summary>
     /// LocalSystem only has one instance.

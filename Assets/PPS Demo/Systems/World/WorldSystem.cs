@@ -5,7 +5,7 @@ using UnityEngine;
 using PPS;
 
 [Serializable]
-public class WorldSystem : System<WorldProcessor, WorldProfile> {
+public class WorldSystem : System<WorldProcessor> {
 
     [Serializable]
     public struct Spawner {
@@ -45,7 +45,7 @@ public class WorldSystem : System<WorldProcessor, WorldProfile> {
     }
 
     protected override void DeploySubsystems() {
-        DeploySubsystem<ShooterSystem, ShooterProcessor, ShooterProfile>(ref this.shooterSystem);
-        DeploySubsystem<LocalSystem, LocalProcessor, LocalProfile>(ref this.localSystem);
+        DeploySubsystem<ShooterSystem, ShooterProcessor>(ref this.shooterSystem);
+        DeploySubsystem<LocalSystem, LocalProcessor>(ref this.localSystem);
     }
 }

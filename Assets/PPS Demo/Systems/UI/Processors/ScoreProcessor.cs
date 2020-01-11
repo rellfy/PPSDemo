@@ -1,14 +1,20 @@
 using System;
 using PPS;
 
-public class ScoreProcessor : Processor<UISystem, UIProfile> {
+public class ScoreProcessor : Processor {
 
-    public ScoreProcessor(UISystem system, UIProfile profile) : base(system, profile) {
-        foreach (ShooterProcessor shooterProcessor in System.WorldSystem.ShooterSystem.Instances) {
+    private UIProfile profile;
+    private UISystem system;
+
+    public ScoreProcessor(UISystem system, UIProfile profile) {
+        this.system = system;
+        this.profile = profile;
+
+        foreach (ShooterProcessor shooterProcessor in this.system.WorldSystem.ShooterSystem.Instances) {
             shooterProcessor.Dead += OnShooterDead;
         }
 
-        System.WorldSystem.ShooterSystem.InstanceDeployed += OnShooterDeployed;
+        this.system.WorldSystem.ShooterSystem.InstanceDeployed += OnShooterDeployed;
         UpdateEnemyCount();
     }
 
@@ -19,19 +25,19 @@ public class ScoreProcessor : Processor<UISystem, UIProfile> {
     }
 
     private void OnShooterDead(object sender, ShooterProcessor killer) {
-        bool localScore = killer == System.WorldSystem.LocalSystem.LocalInstance.Shooter;
+        bool localScore = killer == this.system.WorldSystem.LocalSystem.LocalInstance.Shooter;
 
         if (localScore) {
-            Profile.AddLocalScore(10);
+            this.profile.AddLocalScore(10);
         } else {
-            Profile.AddEnemyScore(1);
+            this.profile.AddEnemyScore(1);
         }
 
         UpdateEnemyCount();
     }
 
     private void UpdateEnemyCount() {
-        int count = System.WorldSystem.ShooterSystem.Instances.Count - 1;
-        Profile.SetEnemyScoreLabel($"ENEMIES [{count}] SCORE:");
+        int count = this.system.WorldSystem.ShooterSystem.Instances.Count - 1;
+        this.profile.SetEnemyScoreLabel($"ENEMIES [{count}] SCORE:");
     }
 }
